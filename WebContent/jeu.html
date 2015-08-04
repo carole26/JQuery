@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>jeu</title>
+  <style type="text/css">
+    #jeu{
+      width: 400px;
+      height: 400px;
+      border: 2px black solid;
+      overflow: hidden;
+      position: relative;
+    }
+    .fond{
+      margin-bottom:-5px; 
+      z-index: 10;
+      position: relative;
+    }
+    #soucoupe{
+      z-index: 100; 
+      position: absolute; 
+      top: 10px; 
+      left: 48px;
+    }
+    #bon, #mauvais{
+      z-index: 80; 
+      position: absolute; 
+      top: -200px; 
+      left: 0px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="jeu">
+    <img id="fond1" class="fond" src="img/jeu/fond.png">
+    <img id="fond2" class="fond" src="img/jeu/fond.png">
+    <img id="soucoupe" src="img/jeu/soucoupe.png">
+    <img id="bon" src="img/jeu/bon.png">
+    <img id="mauvais" src="img/jeu/mauvais.png">
+  </div>
+  Bon : <span id="infoBon">0</span> Mauvais : <span id="infoMauvais">0</span> Score : <span id="score">0</span>
+  <audio preload="auto" id="musiqueFond" autoplay="autoplay" loop="loop">
+  	<source src="audio/music.mp3" type="audio/mp3">
+  	<source src="audio/music.mp3" type="audio/ogg">
+   </audio>
+
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <script>
+    $(function() {
+      var ok = 1;
+      var nbBon = 1;
+      function deplace()
+      {
+        $('#mauvais').animate({top: '-=600'}, 2500, 'linear', function(){
+          var mauvaisX = Math.floor(Math.random()*194)+70;
+          var mauvaisY = 400;
+          $('#mauvais').css('top',mauvaisY);
+          $('#mauvais').css('left',mauvaisX);
+          ok = 1;
+        });
+        $('#bon').animate({top: '-=600'}, 3000, 'linear', function(){
+            var bonX = Math.floor(Math.random()*194)+70;
+            var bonY = 400;
+            $('#bon').css('top',bonY);
+            $('#bon').css('left',bonX);
+            nbBon = 1;
+          });
+        $('.fond').animate({top: '-=360'}, 1000, 'linear', function(){
+          $('.fond').css('top',0);
+          deplace();
+        });
+      };
+	   
+      $(document).keydown(function(e){
+    	 soucoupeX = parseInt($('#soucoupe').css('left'));
+    	 soucoupeY = parseInt($('#soucoupe').css('top'));
+    	 
+    	 var HAUT = 104;
+    	 var BAS = 98;
+    	 var DROITE = 102;
+    	 var GAUCHE = 100;
+    	 var DIAG_B_D = 99;
+    	 var DIAG_H_G = 103;
+    	 var DIAG_B_G = 97;
+    	 var DIAG_H_D = 105;
+    	 
+        if (e.which == 39 || e.which == DIAG_B_D || e.which == DIAG_H_D || e.which == DROITE) { //droite
+          if (soucoupeX < 280)
+          $('#soucoupe').css('left', soucoupeX+30);
+        }
+        if (e.which == 37 || e.which == DIAG_H_G || e.which == DIAG_B_G || e.which == GAUCHE) { //gauche
+          if (soucoupeX > 0)
+            $('#soucoupe').css('left', soucoupeX-30);
+        }
+        
+        if (e.which == 40 || e.which == DIAG_B_D || e.which == DIAG_B_G || e.which == BAS) {//bas
+         if (soucoupeY < 250)
+            $('#soucoupe').css('top', soucoupeY+30);
+        }
+        
+        if (e.which == 38 || e.which == DIAG_H_G || e.which == DIAG_H_D || e.which == HAUT) {//haut
+           if (soucoupeY > 30)
+              $('#soucoupe').css('top', soucoupeY-30);
+         }
+        
+      });
+
+      function collision()
+      {
+        soucoupeX = parseInt($('#soucoupe').css('left'));
+        mauvaisX = parseInt($('#mauvais').css('left'));
+        bonX = parseInt($('#bon').css('left'));
+        soucoupeY = 10;
+        mauvaisY = parseInt($('#mauvais').css('top'));
+        bonY = parseInt($('#bon').css('top'));
+        //Collision avec le mauvais
+        if (((mauvaisX > soucoupeX) && (mauvaisX < (soucoupeX+66)) && (mauvaisY > soucoupeY) && (mauvaisY < (soucoupeY+150)) && (ok == 1)) 
+        	|| ((soucoupeX > mauvaisX) && (soucoupeX < (mauvaisX+66)) && (mauvaisY > soucoupeY) && (mauvaisY < (soucoupeY+150)) && (ok == 1))){
+          	collision = parseInt($('#infoMauvais').text()) + 1;
+          	$('#infoMauvais').text(collision);
+	  	  	ok = 0;
+        }
+       //Collision avec le bon
+       if (((bonX > soucoupeX) && (bonX < (soucoupeX+66)) && (bonY > soucoupeY) && (bonY < (soucoupeY+150)) && (nbBon == 1)) 
+        	|| ((soucoupeX > bonX) && (soucoupeX < (bonX+66)) && (bonY > soucoupeY) && (bonY < (soucoupeY+150)) && (nbBon == 1))){
+                collision = parseInt($('#infoBon').text()) + 1;
+                $('#infoBon').text(collision);
+      	  	    nbBon = 0;
+      	} 
+      
+       $('#score').text(parseInt($('#infoBon').text()) * 5 - parseInt($('#infoMauvais').text()) * 5);
+      }
+      deplace();
+      setInterval(collision, 20);
+    });
+  </script>
+</body>
+</html>
